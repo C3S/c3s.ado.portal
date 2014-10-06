@@ -11,4 +11,12 @@ virtualenv env
 ./env/bin/python setup.py develop
 
 # run the tests
-./env/bin/nosetests
+./env/bin/nosetests --cover-html --with-xunit
+
+# for pyflakes
+find c3sadoportal -regex '.*.py' ! -regex '.*tests.*'|egrep -v '^./tests/'|xargs env/bin/pyflakes  > pyflakes.log || :
+# for pylint
+rm -f pylint.log
+for f in `find c3sadoportal -regex '.*.py' ! -regex '.*tests.*'|egrep -v '^./tests/'`; do
+env/bin/pylint --output-format=parseable --reports=y $f >> pylint.log
+done || :
