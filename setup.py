@@ -13,7 +13,7 @@ requires = [
     'cornice',
     'coverage',
     'cryptacular',
-    'deform',
+    'deform==2.0a2',
     'nose',
     'pyramid',
     'pyramid_beaker',
