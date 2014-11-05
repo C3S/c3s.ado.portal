@@ -42,8 +42,7 @@ def main(argv=sys.argv):  # pragma: no cover
         )
         DBSession.add(login_group)
         person = People(
-            login='foo',
+            login='dev@c3s.cc',
             password='foobar',
-            email='dev@c3s.cc',
         )
         DBSession.add(person)
