@@ -60,17 +60,14 @@ class LoginFunctionalTests(unittest.TestCase):
     def _insert_members(self):
         with transaction.manager:
             member1 = People(  # german
-                login=u'login1',
                 email=u'l1@c3s.cc',
                 password=u'arandompassword',
             )
             member2 = People(  # german
-                login=u'login2',
                 email=u'l2@c3s.cc',
                 password=u'arandompassword2',
             )
             member3 = People(  # german
-                login=u'login3',
                 email=u'l3@c3s.cc',
                 password=u'arandompassword3',
             )
@@ -102,7 +99,7 @@ class LoginFunctionalTests(unittest.TestCase):
         res3 = form.submit('submit', status=200)
         # try valid user, valid password
         form = res2.form
-        form['login'] = 'login1'
+        form['login'] = 'l1@c3s.cc'
         form['password'] = 'arandompassword'
         res3 = form.submit('submit', status=302)
         #
@@ -132,7 +129,7 @@ class LoginFunctionalTests(unittest.TestCase):
         self.failUnless('login' in res.body)
         # try invalid user
         form = res.form
-        form['login'] = u'login1'
+        form['login'] = u'l1@c3s.cc'
         form['password'] = u'arandompassword'
         res = form.submit('submit', status=302)
         #
@@ -169,9 +166,8 @@ class LoginFunctionalTests(unittest.TestCase):
             'There was a problem with your submission' in res.body)
 
         # start over with the form
-        form['login'] = u'login1'
+        form['login'] = 'l1@c3s.cc'
         form['password'] = u'arandompassword'
-        form['email'] = 'dev@c3s.cc'
         res = form.submit('submit', status=200)
         #
         #print(res.body)
@@ -179,15 +175,14 @@ class LoginFunctionalTests(unittest.TestCase):
             'login or email already known' in res.body)
 
         # start over with the form
-        form['login'] = u'login4'
+        form['login'] = u'dev4@c3s.cc'
         form['password'] = u'arandompassword4'
-        form['email'] = u'dev4@c3s.cc'
         res2 = form.submit('submit', status=302)
         #
         res3 = res2.follow()
         #print(res3.body)
         self.failUnless(
-            'You are logged in, login4' in res3.body)
+            'You are logged in, dev4@c3s.cc' in res3.body)
 
         # those who are logged in, may not register
         res5 = self.testapp.get('/register', status=302)

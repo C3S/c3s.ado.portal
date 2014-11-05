@@ -324,12 +324,12 @@ class StaffTests(unittest.TestCase):
 
     def test_staff(self):
         staffer1 = People(
-            login=u'staffer1',
+            email=u'staffer1@c3s.cc',
             password=u'stafferspassword'
         )
         staffer1.group = ['staff']
         staffer2 = People(
-            login=u'staffer2',
+            email=u'staffer2@c3s.cc',
             password=u'staffer2spassword',
         )
         staffer2.group = ['staff2']
@@ -349,11 +349,11 @@ class StaffTests(unittest.TestCase):
         #print('by login: %s' % People.get_by_login(u'cashier1'))
         self.assertEqual(
             People.get_by_id(_staffer1_id),
-            People.get_by_login(u'staffer1')
+            People.get_by_email(u'staffer1@c3s.cc')
         )
         self.assertEqual(
             People.get_by_id(_staffer2_id),
-            People.get_by_login(u'staffer2')
+            People.get_by_email(u'staffer2@c3s.cc')
         )
 
         '''test get_all'''
@@ -366,8 +366,8 @@ class StaffTests(unittest.TestCase):
         self.assertEqual(len(res), 1)
 
         '''test check_user_or_None'''
-        res1 = People.check_user_or_None(u'staffer2')
-        res2 = People.check_user_or_None(u'staffer1')
+        res1 = People.check_user_or_None(u'staffer2@c3s.cc')
+        res2 = People.check_user_or_None(u'staffer1@c3s.cc')
         #print res1
         #print res2
         self.assertTrue(res1 is not None)
@@ -375,5 +375,5 @@ class StaffTests(unittest.TestCase):
 
         '''test check_password'''
         #print(People.check_password(cashier1, 'cashierspassword'))
-        People.check_password(u'staffer2', u'staffer2spassword')
+        People.check_password(u'staffer2@c3s.cc', u'staffer2spassword')
         #self.assert

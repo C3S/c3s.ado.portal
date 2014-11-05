@@ -98,26 +98,24 @@ people_groups = Table(
 
 class People(Base):
     """
-    people may login and do things
+    people may log in and do things
     """
     __tablename__ = 'people'
     id = Column(Integer, primary_key=True)
-    login = Column(Unicode(255), unique=True)
+    email = Column(Unicode(255), unique=True)
     _password = Column('password', Unicode(60))
     last_password_change = Column(
         DateTime,
         default=func.current_timestamp())
-    email = Column(Unicode(255), unique=True)
     groups = relationship(
         Group,
         secondary=people_groups,
         backref="people")
 
-    def _init_(self, login, password, email):  # pragma: no cover
-        self.login = login
+    def _init_(self, email, password):  # pragma: no cover
+        self.email = email
         self.password = password
         self.last_password_change = datetime.now()
-        self.email = email
 
     #@property
     #def __acl__(self):
@@ -145,19 +143,14 @@ class People(Base):
         return DBSession.query(cls).filter(cls.id == id).first()
 
     @classmethod
-    def get_by_login(cls, login):
-        #dbSession = DBSession()
-        return DBSession.query(cls).filter(cls.login == login).first()
-
-    @classmethod
     def get_by_email(cls, email):
         #dbSession = DBSession()
         return DBSession.query(cls).filter(cls.email == email).first()
 
     @classmethod
-    def check_password(cls, login, password):
+    def check_password(cls, email, password):
         #dbSession = DBSession()
-        staffer = cls.get_by_login(login)
+        staffer = cls.get_by_email(email)
         #if staffer is None:  # ?
         #    return False
         #if not staffer:  # ?
@@ -166,14 +159,14 @@ class People(Base):
 
     # this one is used by RequestWithUserAttribute
     @classmethod
-    def check_user_or_None(cls, login):
+    def check_user_or_None(cls, email):
         """
         check whether a user by that username exists in the database.
         if yes, return that object, else None.
         returns None if username doesn't exist
         """
-        login = cls.get_by_login(login)  # is None if user not exists
-        return login
+        email = cls.get_by_email(email)  # is None if user not exists
+        return email
 
     @classmethod
     def delete_by_id(cls, id):

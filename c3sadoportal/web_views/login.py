@@ -74,7 +74,8 @@ def login_view(request):
         """
         login = colander.SchemaNode(
             colander.String(),
-            title=_(u"login"),
+            title=_(u"login (email)"),
+            description=_(u'log in using your email address'),
             oid="login",
         )
         password = colander.SchemaNode(
@@ -82,6 +83,8 @@ def login_view(request):
             validator=colander.Length(min=5, max=100),
             widget=deform.widget.PasswordWidget(size=20),
             title=_(u"password"),
+            description=_(
+                u'for testing: log in an dev@c3s.cc with password foobar'),
             oid="password",
         )
 
@@ -189,7 +192,11 @@ def register(request):
         """
         login = colander.SchemaNode(
             colander.String(),
-            title=_(u"login"),
+            validator=colander.Email(),
+            title=_(u"login (your email address)"),
+            description=_(
+                u"enter a valid email address. "
+                u"we will send you an email to verify your account"),
             oid="login",
         )
         password = colander.SchemaNode(
@@ -198,12 +205,6 @@ def register(request):
             widget=deform.widget.PasswordWidget(size=20),
             title=_(u"password"),
             oid="password",
-        )
-        email = colander.SchemaNode(
-            colander.String(),
-            validator=colander.Email(),
-            title=_(u"email"),
-            oid="email",
         )
         #captcha = colander.SchemaNode(
         #    colander.String(),
@@ -241,25 +242,19 @@ def register(request):
         # get user and check pw...
         _login = appstruct['login']
         _password = appstruct['password']
-        _email = appstruct['email']
 
         try:
             # check if data is valid
             # * no duplicate accounts...
-            #print '*'*60
-            login_unique = False if People.get_by_login(_login) else True
-            #print "login_unique: {}".format(login_unique)
-            email_unique = False if People.get_by_email(_email) else True
-            #print "email_unique: {}".format(email_unique)
-            #print '*'*60
+            login_unique = False if People.get_by_email(_login) else True
+
         except:  # pragma: no cover
             pass
-        if login_unique and email_unique:
+        if login_unique:
             # persist user
             _new = People(
-                login=_login,
+                email=_login,
                 password=_password,
-                email=_email
             )
             _new.groups = [Group.get_login_group()]
             DBSession.add(_new)
@@ -273,7 +268,7 @@ def register(request):
             )
         else:
             log.info(
-                "login or email already known: {}, {}".format(_login, _email))
+                "login or email already known: {}".format(_login))
             request.session.flash(
                 'login or email already known',
                 'message_sign_up',
