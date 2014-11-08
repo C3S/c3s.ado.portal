@@ -15,12 +15,9 @@ from pyramid.threadlocal import get_current_request
 #from pyramid_mailer.message import Message
 from translationstring import TranslationStringFactory
 #from types import NoneType
+from trytond.transaction import Transaction
+from trytond.exceptions import UserError as TrytonUserError
 
-from c3sadoportal.models import (
-    DBSession,
-    Group,
-    People,
-)
 deform_templates = resource_filename('deform', 'templates')
 c3smembership_templates = resource_filename('c3sadoportal', 'templates')
 
@@ -118,11 +115,9 @@ def login_view(request):
         # get user and check pw...
         login = appstruct['login']
         password = appstruct['password']
-
-        try:
-            checked = People.check_password(login, password)
-        except AttributeError:  # pragma: no cover
-            checked = False
+        pool = request.tryton_pool
+        web_user_obj = pool.get('web.user')
+        checked = web_user_obj.authenticate(login, password)
         if checked:
             log.info("password check for %s: good!" % login)
             headers = remember(request, login)
@@ -243,21 +238,23 @@ def register(request):
         _login = appstruct['login']
         _password = appstruct['password']
 
+        pool = request.tryton_pool
+        web_user_obj = pool.get('web.user')
         try:
-            # check if data is valid
-            # * no duplicate accounts...
-            login_unique = False if People.get_by_email(_login) else True
-
-        except:  # pragma: no cover
-            pass
-        if login_unique:
-            # persist user
-            _new = People(
-                email=_login,
-                password=_password,
+            web_user_obj.create(
+                [
+                    {
+                        'email': _login,
+                        'password': _password}])
+        except TrytonUserError, e:
+            log.info(
+                "login or email already known: {}".format(_login))
+            request.session.flash(
+                'login or email already known',
+                'message_sign_up',
             )
-            _new.groups = [Group.get_login_group()]
-            DBSession.add(_new)
+        else:
+            Transaction().cursor.commit()
             headers = remember(request, _login)
 
             return HTTPFound(  # redirect to accountants dashboard
@@ -265,13 +262,6 @@ def register(request):
                     'logged_in',
                     request=request),
                 headers=headers
-            )
-        else:
-            log.info(
-                "login or email already known: {}".format(_login))
-            request.session.flash(
-                'login or email already known',
-                'message_sign_up',
             )
     else:
         request.session.pop('message_above_form')  # remove message fr. session

@@ -8,7 +8,7 @@ from pyramid.security import ALL_PERMISSIONS
 def groupfinder(userid, request):
     user = request.user
     if user:
-        return ['%s' % g for g in user.groups]
+        return [g.name for g in user.groups]
 
 
 ### MAP GROUPS TO PERMISSIONS

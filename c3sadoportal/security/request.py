@@ -3,9 +3,6 @@
 from pyramid.decorator import reify
 from pyramid.request import Request
 from pyramid.security import unauthenticated_userid
-from c3sadoportal.models import (
-    People,
-)
 
 
 class RequestWithUserAttribute(Request):
@@ -17,8 +14,13 @@ class RequestWithUserAttribute(Request):
             # this should return None if the user doesn't exist
             # in the database
             #return dbsession.query('users').filter(user.user_id == userid)
-            return People.check_user_or_None(userid)
-        # else: userid == None
+            pool = self.tryton_pool
+            web_user_obj = pool.get('web.user')
+            user = web_user_obj.search([('email', '=', userid)])
+            if user:
+                user = user[0]
+
+            return user if user else None
         return userid  # pragma: no cover
 
 # /end of ### Making A 'User Object' Available as a Request Attribute
