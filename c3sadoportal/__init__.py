@@ -12,8 +12,8 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 
-from trytond.config import CONFIG
-CONFIG.update_etc('/ado/etc/trytond.conf')
+from trytond.config import config
+config.update_etc('/ado/etc/trytond.conf')
 
 
 def get_tryton_pool(request):
